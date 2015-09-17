@@ -351,16 +351,31 @@ class OpenStackProvider(OpenStackBase):
             raise ProviderException("Could not delete floating ip '{0}'".format(ip))
 
     def _attach_floating_ip(self, instance):
-       # Try to attach a floating IP to the controller
+    # Try to attach a floating IP to the controller
         logging.info("Attaching floating ip to the server...")
-        try:
-            floating_ip = self.nova.floating_ips.create(self.config['floating_ip_pool'])
-            instance.add_floating_ip(floating_ip)
-            logging.debug("ip={0}".format(floating_ip.ip))
-            return floating_ip.ip
-        except Exception as e:
-            raise ProviderException("Failed to attach a floating IP to the controller.\n{0}".format(e))
+        iplist = self.nova.floating_ips.list()
+        for ip_obj in iplist:
+            if ((getattr(ip_obj,'instance_id')) == None):
+                floating_ip = getattr(ip_obj, 'ip')
+                print "*** Found free ip '"+str(floating_ip)+"' ***"
+                instance.add_floating_ip(floating_ip)
+                print "*** Attaching ip '" + str(floating_ip) + "' to the instance ***"
+                logging.debug("ip={0}".format(floating_ip))
+                return floating_ip
+                break
+            
+               
 
+        else:
+            print "*** no free ips found ***"
+            try:
+                floating_ip = self.nova.floating_ips.create(self.config['floating_ip_pool'])
+                print "*** adding created ip ***"
+                instance.add_floating_ip(floating_ip)
+                logging.debug("ip={0}".format(floating_ip.ip))
+                return floating_ip.ip
+            except Exception as e:
+                raise ProviderException("Failed to attach a floating IP to the controller.\n{0}".format(e))
 ##########################################
 class OpenStackController(OpenStackBase):
     """ Provider handle for an open stack controller. """
