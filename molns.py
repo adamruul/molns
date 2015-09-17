@@ -1459,7 +1459,6 @@ COMMAND_LIST = [
             function=MOLNSController.start_controller),
         Command('stop', {'name':None},
             function=MOLNSController.stop_controller),
-       
         Command('terminate', {'name':None},
             function=MOLNSController.terminate_controller),
         Command('put', {'name':None, 'file':None},
