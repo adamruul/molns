@@ -357,20 +357,21 @@ class OpenStackProvider(OpenStackBase):
         for ip_obj in iplist:
             if ((getattr(ip_obj,'instance_id')) == None):
                 floating_ip = getattr(ip_obj, 'ip')
-                print "*** Found free ip '"+str(floating_ip)+"' ***"
-                instance.add_floating_ip(floating_ip)
-                print "*** Attaching ip '" + str(floating_ip) + "' to the instance ***"
-                logging.debug("ip={0}".format(floating_ip))
-                return floating_ip
+                try:
+                    instance.add_floating_ip(floating_ip)
+                    logging.info("Attaching the already available IP '"+str(floating_ip)+"' to the server")
+                    logging.debug("ip={0}".format(floating_ip))
+                    return floating_ip
+                except Exception as e:
+                    raise ProviderException("Failed to attach an already existing floating IP to the controller.\n{0}".format(e))
                 break
             
                
 
         else:
-            print "*** no free ips found ***"
+            logging.info("No available IPs found... Allocating a new one!")
             try:
                 floating_ip = self.nova.floating_ips.create(self.config['floating_ip_pool'])
-                print "*** adding created ip ***"
                 instance.add_floating_ip(floating_ip)
                 logging.debug("ip={0}".format(floating_ip.ip))
                 return floating_ip.ip

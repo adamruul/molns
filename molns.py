@@ -470,10 +470,9 @@ class MOLNSController(MOLNSbase):
     @classmethod
     def restart_controller(cls, args, config, password=None):
         """ Restart the MOLNs controller. """
-        print "*** initiated restart function ***"
         controller_obj = cls._get_controllerobj(args, config)
         if controller_obj is None:
-            print "*** No Controller object found ***"
+            logging.info("No controller object found!")
             return
         # Check if any instances are assigned to this controller
         instance_list = config.get_all_instances(controller_id=controller_obj.id)
@@ -482,7 +481,7 @@ class MOLNSController(MOLNSbase):
             for i in instance_list:
                 if i.worker_group_id is None:
                     status = controller_obj.get_instance_status(i)
-                    print "*** status: "+str(status)+" ***"
+                    logging.debug( "Server status: "+str(status))
                     if status == controller_obj.STATUS_RUNNING:
                         print "Stopping controller running at {0}".format(i.ip_address)
                         controller_obj.stop_instance(i)
@@ -502,11 +501,10 @@ class MOLNSController(MOLNSbase):
         while status is not worker_obj.STATUS_STOPPED:
             status = worker_obj.get_instance_status(i)
 
-        print "*** Instances has stopped ***"
+        logging.info( "Instance has stopped...")
         logging.debug("MOLNSController.start_controller(args={0})".format(args))
         controller_obj = cls._get_controllerobj(args, config)
         if controller_obj is None:
-            print "*** No Controller found  ***"
             return
         # Check if any instances are assigned to this controller
         instance_list = config.get_all_instances(controller_id=controller_obj.id)
@@ -524,11 +522,11 @@ class MOLNSController(MOLNSbase):
                     inst = i
                     break
         else:
-            print "***  No instances in instance_list ***"
+            logging.info("No instances in instance_list")
             
         if inst is None:
             # Start a new instance
-            print "Starting new controller"
+            logging.info("No instance found... Starting a new one!")
             inst = controller_obj.start_instance()
             # deploying
             sshdeploy = SSHDeploy(config=controller_obj.provider, config_dir=config.config_dir)
