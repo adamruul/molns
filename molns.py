@@ -481,7 +481,6 @@ class MOLNSController(MOLNSbase):
             for i in instance_list:
                 if i.worker_group_id is None:
                     status = controller_obj.get_instance_status(i)
-                    logging.debug( "Server status: "+str(status))
                     if status == controller_obj.STATUS_RUNNING:
                         print "Stopping controller running at {0}".format(i.ip_address)
                         controller_obj.stop_instance(i)
